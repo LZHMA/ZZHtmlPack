@@ -7,12 +7,45 @@ namespace ZZHtmlPack
     /// </summary>
     public class HtmlAttribute : IComparable
     {
+        private string _name;
+        private string _value;
         internal HtmlAttribute(HtmlDocument ownerdocument)
         {
             OwnerDocument = ownerdocument;
         }
 
         #region  Properties
+        /// <summary>
+        /// The qualified name of the attribute
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return _name.ToLower();
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("value");
+                _name = value;
+            }
+        }
+        
+        public string Value
+        {
+            get{
+                return _value;
+            }
+            set{
+                _value=value;
+            }
+        }
+
+        public string OriginalName
+        {
+            get => _name;
+        }
         /// <summary>
         /// Line number of this attribute in the document
         /// </summary>
@@ -31,7 +64,7 @@ namespace ZZHtmlPack
         /// <summary>
         /// The HTML node to which this attribute belongs to
         /// </summary>
-        public HtmlNode OwnerNode { get; }
+        public HtmlNode OwnerNode { get; set; }
 
         /// <summary>
         /// Specifies which type of quote the data should be wrapped in
@@ -43,6 +76,14 @@ namespace ZZHtmlPack
         /// </summary>
         public int SteamPosition { get; }
         #endregion
+
+        public int CompareTo(object obj)
+        {
+            HtmlAttribute att=obj as HtmlAttribute;
+            if(att==null)
+                throw new ArgumentException("obj");
+            return Name.CompareTo(att.Name);
+        }
     }
 
     /// <summary>
