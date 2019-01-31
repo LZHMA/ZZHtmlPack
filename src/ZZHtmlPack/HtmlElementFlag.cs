@@ -1,6 +1,6 @@
 using System;
 
-namespace HtmlAgilityPack
+namespace ZZHtmlPack
 {
     /// <summary>
     /// Flags that describe the behavior of an Element node.

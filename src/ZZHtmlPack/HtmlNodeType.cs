@@ -1,6 +1,6 @@
 using System;
 
-namespace HtmlAgilityPack
+namespace ZZHtmlPack
 {
     /// <summary>
     /// Represents the type of a node.

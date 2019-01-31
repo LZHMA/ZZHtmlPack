@@ -6,13 +6,12 @@ namespace ZZHtmlPack
 {
     public class HtmlAttributeCollection : IList<HtmlAttribute>
     {
-        private HtmlNode _ownerNode;
         private Dictionary<string, HtmlAttribute> hashItems = new Dictionary<string, HtmlAttribute>();
         private List<HtmlAttribute> items = new List<HtmlAttribute>();
 
         public HtmlAttributeCollection(HtmlNode ownernode)
         {
-            _ownerNode = ownernode;
+            OwnerNode = ownernode;
         }
         #region Prperties
         /// <summary>
@@ -31,10 +30,6 @@ namespace ZZHtmlPack
                     throw new ArgumentNullException("name");
                 HtmlAttribute value;
                 return hashItems.TryGetValue(name.ToLower(), out value) ? value : null;
-            }
-            set
-            {
-
             }
         }
         #endregion
