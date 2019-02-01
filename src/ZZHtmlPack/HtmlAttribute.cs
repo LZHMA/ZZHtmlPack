@@ -9,9 +9,11 @@ namespace ZZHtmlPack
     {
         private string _name;
         private string _value;
-        internal HtmlAttribute(HtmlDocument ownerdocument)
+        internal HtmlAttribute(HtmlNode ownerNode,string attName,string value)
         {
-            OwnerDocument = ownerdocument;
+            OwnerNode=ownerNode;
+            Name=attName;
+            Value=value;
         }
 
         #region  Properties
@@ -31,14 +33,16 @@ namespace ZZHtmlPack
                 _name = value;
             }
         }
-        
+
         public string Value
         {
-            get{
+            get
+            {
                 return _value;
             }
-            set{
-                _value=value;
+            set
+            {
+                _value = value;
             }
         }
 
@@ -55,11 +59,6 @@ namespace ZZHtmlPack
         /// The column number of this attribute in the document
         /// </summary>
         public int LinePostition { get; }
-
-        /// <summary>
-        /// The HTML document to which this attribute belongs to
-        /// </summary>
-        public HtmlDocument OwnerDocument { get; }// attribute can exists without a node
 
         /// <summary>
         /// The HTML node to which this attribute belongs to
@@ -79,8 +78,8 @@ namespace ZZHtmlPack
 
         public int CompareTo(object obj)
         {
-            HtmlAttribute att=obj as HtmlAttribute;
-            if(att==null)
+            HtmlAttribute att = obj as HtmlAttribute;
+            if (att == null)
                 throw new ArgumentException("obj");
             return Name.CompareTo(att.Name);
         }
