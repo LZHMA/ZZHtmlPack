@@ -8,6 +8,7 @@ namespace ZZHtmlPack
     [DebuggerDisplay("Name:{OriginalName}")]
     public partial class HtmlNode
     {
+        internal const string DepthLevelExceptionMessage="The document is too complex to parse.";
         #region Static Members
         private static readonly string HtmlNodeTypeNameComment = "#comment";
         private static readonly string HtmlNodeTypeNameDocument = "#document";
@@ -57,14 +58,24 @@ namespace ZZHtmlPack
 
         #region Field
         private List<HtmlAttribute> _attributes = new List<HtmlAttribute>();
-
+        private HtmlNodeType _nodeType;
+        private HtmlDocument _ownerDocument;
+        private HtmlNode _parentNode;
+        private Int32 _index;
         private HtmlNode _endNode;
         #endregion
 
+        /// <summary>
+        /// Initializes <see cref="HtmlNode"/>,providing type,owner document,and the index presenting the position of the new node in its siblings
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="ownerDocument"></param>
+        /// <param name="index"></param>
         public HtmlNode(HtmlNodeType type, HtmlDocument ownerDocument, int index)
         {
-            NodeType = type;
-            OwnerDocument = ownerDocument;
+            _nodeType = type;
+            _ownerDocument = ownerDocument;
+            _index=index;
 
             switch (type)
             {
@@ -81,12 +92,26 @@ namespace ZZHtmlPack
                     _endNode = this;
                     break;
             }
+
+            if(_ownerDocument.OpenedNodes!=null)
+            {
+                if(!Closed)
+                {
+                    //use the index as the key
+                    //-1 means the node comes from publicz
+                    if(index!=-1)
+                    {
+                        _ownerDocument.OpenedNodes.Add(index,this);
+                    }
+                }
+            }
         }
 
         #region Property
-        public HtmlNodeType NodeType { get; internal set; }
-        public HtmlDocument OwnerDocument { get; internal set; }
-        public HtmlNode ParentNode { get; internal set; }
+        
+        /// <summary>
+        /// presenting the position of the new node in its siblings
+        /// </summary>
         public HtmlNode PrevNode { get; internal set; }
         public HtmlNode NextNode { get; internal set; }
         public string Name { get; set; }
@@ -117,6 +142,12 @@ namespace ZZHtmlPack
             }
         }
         public bool Closed => (_endNode != null);
+        public virtual string InnerHtml
+        {
+            get{
+
+            }
+        }
         public int Line { get; internal set; }
         public int LinePosition { get; internal set; }
         public bool HasAttributes
@@ -259,6 +290,76 @@ namespace ZZHtmlPack
             }
 
             ChildNodes.Insert(index, newNode);
+        }
+
+        /// <summary>
+        /// Save all the children of the node to the specified TextWriter.
+        /// </summary>
+        /// <param name="outText">The TextWriter to which you want to save.</param>
+        /// <param name="level">Indentifies the level we are in starting at root with 0</param>
+        public void WriteContentTo(TextWriter outText,int level=0)
+        {
+            if(level>HtmlDocument.MaxDepthLevel)
+            {
+                throw new ArgumentException(HtmlNode.DepthLevelExceptionMessage);
+            }
+            if(ChildNodes==null||ChildNodes.Count==0)
+            {
+                return;
+            }
+            foreach(HtmlNode node in ChildNodes)
+            {
+                node
+            }
+        }
+
+        /// <summary>
+		/// Saves all the children of the node to a string.
+		/// </summary>
+		/// <returns>The saved string.</returns>
+        public string WriteContentTo()
+        {
+            StringWriter sw=new StringWriter();
+        }
+        
+        /// <summary>
+        /// Save the current node to the specified TextWriter.
+        /// </summary>
+        /// <param name="outText">The TextWriter to which you want to save.</param>
+        /// <param name="level">Indentifies the level we are in starting at root with 0</param>
+        public void WriteTo(TextWriter outText,int level=0)
+        {
+            string html;
+            switch(_nodeType)
+            {
+                case HtmlNodeType.Comment:
+                    html=((HtmlCommentNode)this).Comment;
+                    if(_ownerDocument.OptionOutputAsXml)
+                        outText.Write("<!--"+GetXmlComment((HtmlCommentNode)this)+" -->");
+                    else
+                        outText.Write(html);
+                    break;
+
+                case HtmlNodeType.Document:
+                    if(_ownerDocument.OptionOutputAsXml)
+                    {
+                        outText.Write("<?xml version=\"1.0\" encoding=\"" + _ownerDocument.GetOutEncoding().WebName + "\"?>");
+                    }
+
+            }
+        }
+        #endregion
+
+        internal static string GetXmlComment(HtmlCommentNode comment)
+        {
+            string s=comment.Comment;
+            return s.Substring(4,s.Length-7).Replace("--"," - -");
+        }
+
+        #region Private Methods
+        private void UpdateHtml()
+        {
+
         }
         #endregion
     }
